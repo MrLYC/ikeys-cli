@@ -1,0 +1,16 @@
+language: python
+sudo: true
+python:
+    - 2.7
+    - 3.3
+    - 3.4
+    - 3.5
+    - 3.6
+    - pypy
+install:
+    - pip install codecov pytest-cov
+script:
+    - python setup.py install
+    - env PYTHONPATH=. py.test -v --cov=./ tests
+after_success:
+    - codecov
