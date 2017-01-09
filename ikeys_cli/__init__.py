@@ -212,10 +212,11 @@ class IKeytoneAPI(SimpleHTTPAPI):
 
     @classmethod
     def get_signature_info(cls, sid, effect_millis, nonce=None):
+        content = "%s%x%x" % (sid, nonce, effect_millis)
+        if not isinstance(content, bytes):
+            content = bytes(content, "utf-8")
         nonce = nonce or int(time.time() * 1000000)
-        signature = hashlib.md5(
-            "%s%x%x" % (sid, nonce, effect_millis)
-        ).hexdigest()
+        signature = hashlib.md5(content).hexdigest()
         token = "%s-%x-%s" % (sid, nonce, signature)
         return SignatureInfo(
             sid=sid, effect_millis=effect_millis,

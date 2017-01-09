@@ -8,9 +8,10 @@ python:
     - 3.6
     - pypy
 install:
+    - pip install -r requirements.txt
     - pip install codecov pytest-cov
 script:
-    - python setup.py install
     - env PYTHONPATH=. py.test -v --cov=./ tests
+    - python setup.py install
 after_success:
     - codecov
