@@ -70,11 +70,13 @@ class TestIKeytoneAPI(unittest.TestCase):
         api.test.check(data=data)
         self.request_mock.assert_called_with(
             url=url + self.test_path, method="POST", json=data,
+            headers=api._headers,
         )
 
         api.test.get(data=data)
         self.request_mock.assert_called_with(
             url=url + self.test_path, method="GET", params=data,
+            headers=api._headers,
         )
 
     def test_get_result_from_response2(self):
@@ -102,3 +104,16 @@ class TestIKeytoneAPI(unittest.TestCase):
 
         with self.assertRaises(ikeys_cli.ResultParseError):
             api.test.check()
+
+    def test_auth_by_passwd(self):
+        api = ikeys_cli.IKeytoneAPI("http://ikeystone.yy.com/v1/")
+        api.auth_by_passwd("domain", "admin", "test")
+        api.test.get()
+        self.request_mock.assert_called_with(
+            url=api._url + self.test_path, method="GET",
+            headers={
+                "X-AUTH-DOMAIN": "domain",
+                "X-AUTH-USER": "admin",
+                "X-AUTH-PASS": "test",
+            },
+        )

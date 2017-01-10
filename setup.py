@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name="ikeys-cli",
     packages=["ikeys_cli"],
-    version="0.1.0",
+    version="0.2.0",
     description="ikeystone python client",
     url="https://github.com/MrLYC/ikeys-cli",
     author="MrLYC",
@@ -28,5 +28,5 @@ setup(
         "Programming Language :: Python :: 3.6",
     ],
     keywords=["ikeystone"],
-    install_requires=["requests>=2.7.0", "IFV>=0.1.3"],
+    install_requires=["requests>=2.7.0", "IFV>=0.1.4"],
 )

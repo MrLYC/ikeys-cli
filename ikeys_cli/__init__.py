@@ -122,7 +122,7 @@ class IKeytoneAPI(SimpleHTTPAPI):
                 "lookup": APIPathInfo(
                     "domain/lookupService", "GET",
                     u"查询域服务API",
-                )
+                ),
             },
             "request": {
                 "verify": APIPathInfo(
@@ -209,6 +209,13 @@ class IKeytoneAPI(SimpleHTTPAPI):
             errmsg=result.get("errmsg"),
             data=result.get("data"),
         )
+
+    def auth_by_passwd(self, domain, user, passwd):
+        self._headers.update({
+            "X-AUTH-DOMAIN": domain,
+            "X-AUTH-USER": user,
+            "X-AUTH-PASS": passwd,
+        })
 
     @classmethod
     def get_signature_info(cls, sid, effect_millis, nonce=None):
