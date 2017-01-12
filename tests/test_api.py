@@ -7,6 +7,34 @@ import mock
 import ikeys_cli
 
 
+class TestSha1(unittest.TestCase):
+    def test_bytes(self):
+        self.assertEqual(
+            ikeys_cli.sha1(b"lyc"),
+            "05a6dfe7568c72fa1ac0598459af1735df3be258",
+        )
+
+    def test_unicode(self):
+        self.assertEqual(
+            ikeys_cli.sha1(b"lyc".decode("utf-8")),
+            "05a6dfe7568c72fa1ac0598459af1735df3be258",
+        )
+
+
+class TestMD5(unittest.TestCase):
+    def test_bytes(self):
+        self.assertEqual(
+            ikeys_cli.md5(b"lyc"),
+            "efa664720fac0075674862b40d490830",
+        )
+
+    def test_unicode(self):
+        self.assertEqual(
+            ikeys_cli.md5(b"lyc".decode("utf-8")),
+            "efa664720fac0075674862b40d490830",
+        )
+
+
 class TestIKeytoneAPI(unittest.TestCase):
     def setUp(self):
         self.test_path = "test/path"
@@ -165,17 +193,18 @@ class TestIKeytoneAPI(unittest.TestCase):
         project = "my_project"
         api.authenticate(domain, user, password, project)
 
+        response_data = {
+            "domain": domain, "user": user,
+            project: "my_project", "expires": "1598b5b3eb7",
+            "nonce": "74a465fddab8b", "api": "api_name_0",
+            "signature": "56f8519d7f31460821e4722de0c77c5f",
+            "roles": ["SERVICE"],
+        }
         self.request_mock.return_value = mock.MagicMock(json=mock.MagicMock(
-            return_value={"errno": 0, "data": {
-                "domain": domain, "user": user,
-                project: "my_project", "expires": "1598b5b3eb7",
-                "nonce": "74a465fddab8b", "api": "api_name_0",
-                "signature": "56f8519d7f31460821e4722de0c77c5f",
-                "roles": ["SERVICE"],
-            }}))
+            return_value={"errno": 0, "data": response_data}))
 
         result = api.domain.request.verify()
         data = result.data
         self.assertEqual(result.errno, 0)
         self.assertEqual(result.errmsg, None)
-        self.assertListEqual(data["roles"], ["SERVICE"])
+        self.assertEqual(data, response_data)

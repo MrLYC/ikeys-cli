@@ -38,6 +38,18 @@ class ResultParseError(IKeytoneAPIError):
     pass
 
 
+def sha1(data):
+    if not isinstance(data, bytes):
+        data = data.encode("utf-8")
+    return hashlib.sha1(data).hexdigest()
+
+
+def md5(data):
+    if not isinstance(data, bytes):
+        data = data.encode("utf-8")
+    return hashlib.md5(data).hexdigest()
+
+
 class IKeytoneAPI(SimpleHTTPAPI):
     DEFAULT_SIGNATURE_EXPIRES = 20 * 60 * 1000  # now + 20 mins
     PARAMS_METHOD = ["GET", "DELETE"]
@@ -266,12 +278,12 @@ class IKeytoneAPI(SimpleHTTPAPI):
                 "{domain}{user}{pass_sha1}"
                 "{expires_millis:x}{nonce_nanos:x}"
             )
-        signature = hashlib.md5(tpl.format(
+        signature = md5(tpl.format(
             domain=domain, user=user,
-            pass_sha1=hashlib.sha1(password).hexdigest(),
+            pass_sha1=sha1(password),
             expires_millis=expires_millis,
             nonce_nanos=nonce, project=project,
-        )).hexdigest()
+        ))
         return SignatureInfo(
             domain=domain, user=user, project=project,
             expires=expires_millis, nonce=nonce,
