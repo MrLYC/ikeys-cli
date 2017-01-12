@@ -175,6 +175,10 @@ class IKeytoneAPI(SimpleHTTPAPI):
     def __init__(self, url, headers=None):
         super(IKeytoneAPI, self).__init__(url, headers)
         self._init_api_path(self, self.PATH_META)
+        self._domain = None
+        self._project = None
+        self._user = None
+        self._password = None
 
     @classmethod
     def _init_api_path(cls, api_path, sub_info):
@@ -211,6 +215,27 @@ class IKeytoneAPI(SimpleHTTPAPI):
             data=result.get("data"),
         )
 
+    def authenticate(self, domain, user, password, project=None):
+        self._domain = domain
+        self._user = user
+        self._password = password
+        self._project = project
+
+    def get_authentication_headers(self, **kwargs):
+        kwargs["domain"] = self._domain
+        kwargs["user"] = self._user
+        kwargs["password"] = self._password
+        kwargs.setdefault("project", self._project)
+        signature_info = self.get_signature_info(**kwargs)
+        return {
+            "X-AUTH-DOMAIN": signature_info.domain,
+            "X-AUTH-USER": signature_info.user,
+            "X-AUTH-PROJECT": signature_info.project or "",
+            "X-AUTH-EXPIRES": signature_info.expires,
+            "X-AUTH-NONCE": signature_info.nonce,
+            "X-AUTH-SIGNATURE": signature_info.signature,
+        }
+
     @classmethod
     def get_signature_info(
         cls, domain, user, password,
@@ -219,7 +244,7 @@ class IKeytoneAPI(SimpleHTTPAPI):
         expires_millis = expires_millis or int(
             time.time() * 1000 + cls.DEFAULT_SIGNATURE_EXPIRES
         )
-        nonce = nonce or time.time() * 1000000000
+        nonce = nonce or int(time.time() * 1000000000)
         if project:
             tpl = (
                 "{domain}{user}{project}{pass_sha1}"

@@ -111,3 +111,18 @@ class TestIKeytoneAPI(unittest.TestCase):
 
         with self.assertRaises(ikeys_cli.ResultParseError):
             api.test.check()
+
+    def test_get_authentication_headers(self):
+        url = "http://ikeystone.yy.com/v1/"
+        api = ikeys_cli.IKeytoneAPI(url)
+        domain = "domain"
+        user = "user"
+        password = "password"
+        project = "project"
+        api.authenticate(domain, user, password, project)
+        headers = api.get_authentication_headers()
+        self.assertDictContainsSubset({
+            "X-AUTH-DOMAIN": domain,
+            "X-AUTH-USER": user,
+            "X-AUTH-PROJECT": project,
+        }, headers)
