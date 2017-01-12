@@ -154,3 +154,28 @@ class TestIKeytoneAPI(unittest.TestCase):
         api.authenticate(domain, user, password)
         headers = api.get_authentication_headers()
         self.assertNotIn("X-AUTH-PROJECT", headers)
+
+    def test_domain_verify_request(self):
+        url = "http://ikeystone.yy.com/v1/"
+        api = ikeys_cli.IKeytoneAPI(url)
+
+        domain = "my_domain"
+        user = "my_user"
+        password = "password"
+        project = "my_project"
+        api.authenticate(domain, user, password, project)
+
+        self.request_mock.return_value = mock.MagicMock(json=mock.MagicMock(
+            return_value={"errno": 0, "data": {
+                "domain": domain, "user": user,
+                project: "my_project", "expires": "1598b5b3eb7",
+                "nonce": "74a465fddab8b", "api": "api_name_0",
+                "signature": "56f8519d7f31460821e4722de0c77c5f",
+                "roles": ["SERVICE"],
+            }}))
+
+        result = api.domain.request.verify()
+        data = result.data
+        self.assertEqual(result.errno, 0)
+        self.assertEqual(result.errmsg, None)
+        self.assertListEqual(data["roles"], ["SERVICE"])
