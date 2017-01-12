@@ -44,22 +44,29 @@ class TestIKeytoneAPI(unittest.TestCase):
         )
 
     def test_get_signature_info(self):
-        sid = "my_domain-abc-2b7535e356d3c"
-        effect_millis = 3600000
-        nonce = 421186121
+        expires_millis = 1484207387000
+        nonce = 511237945
+        passwd = "456"
+        user = "test"
+        domain = "test"
+        project = "test"
         signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
-            sid=sid, effect_millis=effect_millis, nonce=nonce,
+            domain=domain, user=user, password=passwd,
+            expires_millis=expires_millis, nonce=nonce,
         )
-        self.assertEqual(signature_info.sid, sid)
-        self.assertEqual(signature_info.effect_millis, effect_millis)
-        self.assertEqual(signature_info.nonce, nonce)
         self.assertEqual(
             signature_info.signature,
-            "a9530ef1b4e8f31c3bf5c0574f724d33",
+            "017dd525ff60a6fac6016022d315903a",
+        )
+
+        signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
+            domain=domain, user=user, password=passwd,
+            expires_millis=expires_millis, nonce=nonce,
+            project=project,
         )
         self.assertEqual(
-            signature_info.token,
-            "my_domain-abc-2b7535e356d3c-191aca49-a9530ef1b4e8f31c3bf5c0574f724d33",
+            signature_info.signature,
+            "9a3bfc0e5f714c1cd292fc0b483729b5",
         )
 
     def test_get_result_from_response1(self):
@@ -104,16 +111,3 @@ class TestIKeytoneAPI(unittest.TestCase):
 
         with self.assertRaises(ikeys_cli.ResultParseError):
             api.test.check()
-
-    def test_auth_by_passwd(self):
-        api = ikeys_cli.IKeytoneAPI("http://ikeystone.yy.com/v1/")
-        api.auth_by_passwd("domain", "admin", "test")
-        api.test.get()
-        self.request_mock.assert_called_with(
-            url=api._url + self.test_path, method="GET",
-            headers={
-                "X-AUTH-DOMAIN": "domain",
-                "X-AUTH-USER": "admin",
-                "X-AUTH-PASS": "test",
-            },
-        )

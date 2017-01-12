@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 # coding: utf-8
 
 import time
@@ -20,7 +19,8 @@ APIPathInfo = namedtuple("APIPathInfo", [
     "path", "method", "doc",
 ])
 SignatureInfo = namedtuple("SignatureInfo", [
-    "sid", "effect_millis", "nonce", "signature", "token",
+    "domain", "user", "project", "expires",
+    "nonce", "signature",
 ])
 RequestResult = namedtuple("RequestResult", [
     "errno", "errmsg", "data",
@@ -39,6 +39,7 @@ class ResultParseError(IKeytoneAPIError):
 
 
 class IKeytoneAPI(SimpleHTTPAPI):
+    DEFAULT_SIGNATURE_EXPIRES = 20 * 60 * 1000  # now + 20 mins
     PARAMS_METHOD = ["GET", "DELETE"]
     PATH_META = {
         "domain": {
@@ -210,22 +211,33 @@ class IKeytoneAPI(SimpleHTTPAPI):
             data=result.get("data"),
         )
 
-    def auth_by_passwd(self, domain, user, passwd):
-        self._headers.update({
-            "X-AUTH-DOMAIN": domain,
-            "X-AUTH-USER": user,
-            "X-AUTH-PASS": passwd,
-        })
-
     @classmethod
-    def get_signature_info(cls, sid, effect_millis, nonce=None):
-        content = "%s%x%x" % (sid, nonce, effect_millis)
-        if not isinstance(content, bytes):
-            content = bytes(content, "utf-8")
-        nonce = nonce or int(time.time() * 1000000)
-        signature = hashlib.md5(content).hexdigest()
-        token = "%s-%x-%s" % (sid, nonce, signature)
+    def get_signature_info(
+        cls, domain, user, password,
+        expires_millis=None, nonce=None, project=None,
+    ):
+        expires_millis = expires_millis or int(
+            time.time() * 1000 + cls.DEFAULT_SIGNATURE_EXPIRES
+        )
+        nonce = nonce or time.time() * 1000000000
+        if project:
+            tpl = (
+                "{domain}{user}{project}{pass_sha1}"
+                "{expires_millis:x}{nonce_nanos:x}"
+            )
+        else:
+            tpl = (
+                "{domain}{user}{pass_sha1}"
+                "{expires_millis:x}{nonce_nanos:x}"
+            )
+        signature = hashlib.md5(tpl.format(
+            domain=domain, user=user,
+            pass_sha1=hashlib.sha1(password).hexdigest(),
+            expires_millis=expires_millis,
+            nonce_nanos=nonce, project=project,
+        )).hexdigest()
         return SignatureInfo(
-            sid=sid, effect_millis=effect_millis,
-            nonce=nonce, signature=signature, token=token,
+            domain=domain, user=user, project=project,
+            expires=expires_millis, nonce=nonce,
+            signature=signature,
         )
