@@ -132,9 +132,9 @@ class TestIKeytoneAPI(unittest.TestCase):
             "X-AUTH-USER": user,
             "X-AUTH-PROJECT": project,
         }, headers)
-        self.assertIn("X-AUTH-EXPIRES", headers)
-        self.assertIn("X-AUTH-NONCE", headers)
-        self.assertIn("X-AUTH-SIGNATURE", headers)
+        self.assertIsInstance(headers["X-AUTH-EXPIRES"], str)
+        self.assertIsInstance(headers["X-AUTH-NONCE"], str)
+        self.assertIsInstance(headers["X-AUTH-SIGNATURE"], str)
 
     def test_get_authentication_headers(self):
         url = "http://ikeystone.yy.com/v1/"

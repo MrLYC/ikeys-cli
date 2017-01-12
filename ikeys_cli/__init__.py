@@ -23,7 +23,7 @@ SignatureInfo = namedtuple("SignatureInfo", [
     "nonce", "signature",
 ])
 RequestResult = namedtuple("RequestResult", [
-    "errno", "errmsg", "data",
+    "errno", "errmsg", "data", "response",
 ])
 
 
@@ -192,7 +192,9 @@ class IKeytoneAPI(SimpleHTTPAPI):
                 cls._init_api_path(sub_path, info)
 
     def _get_url_and_method(self, api_path):
-        return urljoin(self._url, api_path._url_path), api_path._method
+        if hasattr(api_path, "_url_path") and hasattr(api_path, "_method"):
+            return urljoin(self._url, api_path._url_path), api_path._method
+        return super(IKeytoneAPI, self)._get_url_and_method(api_path)
 
     def _get_request(
         self, url, method, data=None, set_auth=True,
@@ -219,6 +221,7 @@ class IKeytoneAPI(SimpleHTTPAPI):
             errno=result.get("errno"),
             errmsg=result.get("errmsg"),
             data=result.get("data"),
+            response=response,
         )
 
     def authenticate(self, domain, user, password, project=None):
@@ -236,8 +239,8 @@ class IKeytoneAPI(SimpleHTTPAPI):
         headers = {
             "X-AUTH-DOMAIN": signature_info.domain,
             "X-AUTH-USER": signature_info.user,
-            "X-AUTH-EXPIRES": signature_info.expires,
-            "X-AUTH-NONCE": signature_info.nonce,
+            "X-AUTH-EXPIRES": str(signature_info.expires),
+            "X-AUTH-NONCE": str(signature_info.nonce),
             "X-AUTH-SIGNATURE": signature_info.signature,
         }
         if project:
