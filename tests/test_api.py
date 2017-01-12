@@ -203,7 +203,12 @@ class TestIKeytoneAPI(unittest.TestCase):
         self.request_mock.return_value = mock.MagicMock(json=mock.MagicMock(
             return_value={"errno": 0, "data": response_data}))
 
-        result = api.domain.request.verify()
+        result = api.domain.request.verify(data={
+            "domain": domain, "user": user,
+            project: "my_project", "expires": "1598b5b3eb7",
+            "nonce": "74a465fddab8b", "api": "api_name_0",
+            "signature": "56f8519d7f31460821e4722de0c77c5f",
+        })
         data = result.data
         self.assertEqual(result.errno, 0)
         self.assertEqual(result.errmsg, None)
