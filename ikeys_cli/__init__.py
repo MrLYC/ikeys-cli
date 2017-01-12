@@ -194,12 +194,18 @@ class IKeytoneAPI(SimpleHTTPAPI):
     def _get_url_and_method(self, api_path):
         return urljoin(self._url, api_path._url_path), api_path._method
 
-    def _get_request(self, url, method, data=None, *args, **kwargs):
+    def _get_request(
+        self, url, method, data=None, set_auth=True,
+        *args, **kwargs
+    ):
         if data:
             if method in self.PARAMS_METHOD:
                 kwargs["params"] = data
             else:
                 kwargs["json"] = data
+        if set_auth and self._domain:
+            headers = kwargs.setdefault("headers", {})
+            headers.update(self.get_authentication_headers())
         return super(IKeytoneAPI, self)._get_request(
             url, method, *args, **kwargs
         )
@@ -225,16 +231,18 @@ class IKeytoneAPI(SimpleHTTPAPI):
         kwargs["domain"] = self._domain
         kwargs["user"] = self._user
         kwargs["password"] = self._password
-        kwargs.setdefault("project", self._project)
+        project = kwargs.setdefault("project", self._project)
         signature_info = self.get_signature_info(**kwargs)
-        return {
+        headers = {
             "X-AUTH-DOMAIN": signature_info.domain,
             "X-AUTH-USER": signature_info.user,
-            "X-AUTH-PROJECT": signature_info.project or "",
             "X-AUTH-EXPIRES": signature_info.expires,
             "X-AUTH-NONCE": signature_info.nonce,
             "X-AUTH-SIGNATURE": signature_info.signature,
         }
+        if project:
+            headers["X-AUTH-PROJECT"] = project
+        return headers
 
     @classmethod
     def get_signature_info(

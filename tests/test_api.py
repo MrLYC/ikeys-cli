@@ -112,6 +112,30 @@ class TestIKeytoneAPI(unittest.TestCase):
         with self.assertRaises(ikeys_cli.ResultParseError):
             api.test.check()
 
+    def test_get_result_from_response4(self):
+        url = "http://ikeystone.yy.com/v1/"
+        api = ikeys_cli.IKeytoneAPI(url)
+        self.request_mock.return_value = mock.MagicMock(json=mock.MagicMock(
+            return_value={},
+        ))
+        domain = "domain"
+        user = "user"
+        password = "password"
+        project = "project"
+        api.authenticate(domain, user, password, project)
+        headers = {}
+
+        api.test.check(headers=headers)
+
+        self.assertDictContainsSubset({
+            "X-AUTH-DOMAIN": domain,
+            "X-AUTH-USER": user,
+            "X-AUTH-PROJECT": project,
+        }, headers)
+        self.assertIn("X-AUTH-EXPIRES", headers)
+        self.assertIn("X-AUTH-NONCE", headers)
+        self.assertIn("X-AUTH-SIGNATURE", headers)
+
     def test_get_authentication_headers(self):
         url = "http://ikeystone.yy.com/v1/"
         api = ikeys_cli.IKeytoneAPI(url)
@@ -126,3 +150,7 @@ class TestIKeytoneAPI(unittest.TestCase):
             "X-AUTH-USER": user,
             "X-AUTH-PROJECT": project,
         }, headers)
+
+        api.authenticate(domain, user, password)
+        headers = api.get_authentication_headers()
+        self.assertNotIn("X-AUTH-PROJECT", headers)
