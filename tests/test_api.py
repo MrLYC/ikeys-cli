@@ -72,19 +72,19 @@ class TestIKeytoneAPI(unittest.TestCase):
         )
 
     def test_get_signature_info(self):
-        expires_millis = 1484207387000
-        nonce = 511237945
-        passwd = "456"
-        user = "test"
-        domain = "test"
-        project = "test"
+        expires_millis = "159a6b51778"
+        nonce = "eeac75f"
+        passwd = "123"
+        user = "superadmin"
+        domain = "ADMIN"
+        project = "admin"
         signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
             domain=domain, user=user, password=passwd,
             expires_millis=expires_millis, nonce=nonce,
         )
         self.assertEqual(
             signature_info.signature,
-            "017dd525ff60a6fac6016022d315903a",
+            "ed8b7e31f20e927b3a9cab534af10c33",
         )
 
         signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
@@ -94,7 +94,7 @@ class TestIKeytoneAPI(unittest.TestCase):
         )
         self.assertEqual(
             signature_info.signature,
-            "9a3bfc0e5f714c1cd292fc0b483729b5",
+            "ed8b7e31f20e927b3a9cab534af10c33",
         )
 
     def test_get_result_from_response1(self):

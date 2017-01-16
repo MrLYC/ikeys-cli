@@ -264,20 +264,14 @@ class IKeytoneAPI(SimpleHTTPAPI):
         cls, domain, user, password,
         expires_millis=None, nonce=None, project=None,
     ):
-        expires_millis = expires_millis or int(
+        expires_millis = expires_millis or "%x" % int(
             time.time() * 1000 + cls.DEFAULT_SIGNATURE_EXPIRES
         )
-        nonce = nonce or int(time.time() * 1000000000)
-        if project:
-            tpl = (
-                "{domain}{user}{project}{pass_sha1}"
-                "{expires_millis:x}{nonce_nanos:x}"
-            )
-        else:
-            tpl = (
-                "{domain}{user}{pass_sha1}"
-                "{expires_millis:x}{nonce_nanos:x}"
-            )
+        nonce = nonce or "%x" % int(time.time() * 1000000000)
+        tpl = (
+            "{domain}{user}{pass_sha1}"
+            "{expires_millis}{nonce_nanos}"
+        )
         signature = md5(tpl.format(
             domain=domain, user=user,
             pass_sha1=sha1(password),
