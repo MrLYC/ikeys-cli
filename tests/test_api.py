@@ -72,29 +72,34 @@ class TestIKeytoneAPI(unittest.TestCase):
         )
 
     def test_get_signature_info(self):
-        expires_millis = "159a6b51778"
-        nonce = "eeac75f"
+        expires = "159aa7c5377"
+        nonce = "6321930faa5"
         passwd = "123"
-        user = "superadmin"
-        domain = "ADMIN"
-        project = "admin"
+        user = "my_admin"
+        domain = "my_domain"
         signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
             domain=domain, user=user, password=passwd,
-            expires_millis=expires_millis, nonce=nonce,
+            expires=expires, nonce=nonce,
         )
         self.assertEqual(
             signature_info.signature,
-            "ed8b7e31f20e927b3a9cab534af10c33",
+            "beef3ce36aed1211a4af2e6bc24fe0de",
         )
 
+        expires = "159aa793a91"
+        nonce = "63167719887"
+        project = "ut_project_01b59072_a48d_4005_971b_8ac44dd2672a"
+        passwd = "ut_pass_a46690e9_2825_4fa5_a7f2_6c7e0f2d7e09"
+        user = "ut_user_a46690e9_2825_4fa5_a7f2_6c7e0f2d7e09"
+        domain = "ut_domain_da82c6a5_4b24_4f96_8e83_6b85fdfd4d43"
         signature_info = ikeys_cli.IKeytoneAPI.get_signature_info(
             domain=domain, user=user, password=passwd,
-            expires_millis=expires_millis, nonce=nonce,
+            expires=expires, nonce=nonce,
             project=project,
         )
         self.assertEqual(
             signature_info.signature,
-            "ed8b7e31f20e927b3a9cab534af10c33",
+            "02c5adc1f5874f29a68c303678cb6b2f",
         )
 
     def test_get_result_from_response1(self):
@@ -158,13 +163,12 @@ class TestIKeytoneAPI(unittest.TestCase):
         self.assertDictContainsSubset({
             "X-AUTH-DOMAIN": domain,
             "X-AUTH-USER": user,
-            "X-AUTH-PROJECT": project,
         }, headers)
         self.assertIsInstance(headers["X-AUTH-EXPIRES"], str)
         self.assertIsInstance(headers["X-AUTH-NONCE"], str)
         self.assertIsInstance(headers["X-AUTH-SIGNATURE"], str)
 
-    def test_get_authentication_headers(self):
+    def test_get_request_headers(self):
         url = "http://ikeystone.yy.com/v1/"
         api = ikeys_cli.IKeytoneAPI(url)
         domain = "domain"
@@ -172,15 +176,26 @@ class TestIKeytoneAPI(unittest.TestCase):
         password = "password"
         project = "project"
         api.authenticate(domain, user, password, project)
-        headers = api.get_authentication_headers()
+        headers = api.get_request_headers()
         self.assertDictContainsSubset({
             "X-AUTH-DOMAIN": domain,
             "X-AUTH-USER": user,
             "X-AUTH-PROJECT": project,
         }, headers)
 
+    def test_get_authentication_headers(self):
+        url = "http://ikeystone.yy.com/v1/"
+        api = ikeys_cli.IKeytoneAPI(url)
+        domain = "domain"
+        user = "user"
+        password = "password"
+
         api.authenticate(domain, user, password)
         headers = api.get_authentication_headers()
+        self.assertDictContainsSubset({
+            "X-AUTH-DOMAIN": domain,
+            "X-AUTH-USER": user,
+        }, headers)
         self.assertNotIn("X-AUTH-PROJECT", headers)
 
     def test_domain_verify_request(self):

@@ -5,7 +5,7 @@ from setuptools import setup
 setup(
     name="ikeys-cli",
     packages=["ikeys_cli"],
-    version="0.3.2",
+    version="0.3.3",
     description="ikeystone python client",
     url="https://github.com/MrLYC/ikeys-cli",
     author="MrLYC",

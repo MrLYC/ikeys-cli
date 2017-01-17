@@ -243,10 +243,9 @@ class IKeytoneAPI(SimpleHTTPAPI):
         self._project = project
 
     def get_authentication_headers(self, **kwargs):
-        kwargs["domain"] = self._domain
-        kwargs["user"] = self._user
-        kwargs["password"] = self._password
-        project = kwargs.setdefault("project", self._project)
+        kwargs.setdefault("domain", self._domain)
+        kwargs.setdefault("user", self._user)
+        kwargs.setdefault("password", self._password)
         signature_info = self.get_signature_info(**kwargs)
         headers = {
             "X-AUTH-DOMAIN": signature_info.domain,
@@ -255,31 +254,41 @@ class IKeytoneAPI(SimpleHTTPAPI):
             "X-AUTH-NONCE": str(signature_info.nonce),
             "X-AUTH-SIGNATURE": signature_info.signature,
         }
-        if project:
-            headers["X-AUTH-PROJECT"] = project
+        return headers
+
+    def get_request_headers(self, **kwargs):
+        project = kwargs.setdefault("project", self._project)
+        headers = self.get_authentication_headers(**kwargs)
+        headers["X-AUTH-PROJECT"] = project
         return headers
 
     @classmethod
     def get_signature_info(
         cls, domain, user, password,
-        expires_millis=None, nonce=None, project=None,
+        expires=None, nonce=None, project=None,
     ):
-        expires_millis = expires_millis or "%x" % int(
+        expires = expires or "%x" % int(
             time.time() * 1000 + cls.DEFAULT_SIGNATURE_EXPIRES
         )
         nonce = nonce or "%x" % int(time.time() * 1000000000)
-        tpl = (
-            "{domain}{user}{pass_sha1}"
-            "{expires_millis}{nonce_nanos}"
-        )
+        if project:
+            tpl = (
+                "{domain}{user}{pass_sha1}{project}"
+                "{expires}{nonce_nanos}"
+            )
+        else:
+            tpl = (
+                "{domain}{user}{pass_sha1}"
+                "{expires}{nonce_nanos}"
+            )
         signature = md5(tpl.format(
             domain=domain, user=user,
             pass_sha1=sha1(password),
-            expires_millis=expires_millis,
+            expires=expires,
             nonce_nanos=nonce, project=project,
         ))
         return SignatureInfo(
             domain=domain, user=user, project=project,
-            expires=expires_millis, nonce=nonce,
+            expires=expires, nonce=nonce,
             signature=signature,
         )
