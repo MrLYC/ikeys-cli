@@ -1,5 +1,10 @@
 language: python
 sudo: true
+env:
+    - INSTALL_TYPE=no PYTHONPATH=.
+    - INSTALL_TYPE=direct
+    - INSTALL_TYPE=git
+    - INSTALL_TYPE=pypi
 python:
     - 2.7
     - 3.3
@@ -7,11 +12,14 @@ python:
     - 3.5
     - 3.6
     - pypy
+    - pypy3
 install:
-    - pip install -r requirements.txt
+    - if [[ "${INSTALL_TYPE}" == "no" ]]; then pip install -r requirements.txt; fi
+    - if [[ "${INSTALL_TYPE}" == "direct" ]]; then python setup.py install; fi
+    - if [[ "${INSTALL_TYPE}" == "git" ]]; then pip install https://github.com/MrLYC/ikeys-cli/archive/master.zip; fi
+    - if [[ "${INSTALL_TYPE}" == "pypi" ]]; then pip install ikeys-cli; fi
     - pip install codecov pytest-cov
 script:
-    - env PYTHONPATH=. py.test -v --cov=./ tests
-    - python setup.py install
+    - py.test -v --cov=./ tests
 after_success:
     - codecov

@@ -4,6 +4,17 @@
 [![codecov](https://codecov.io/gh/MrLYC/ikeys-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/MrLYC/ikeys-cli)
 [![PyPI](https://img.shields.io/pypi/pyversions/ikeys-cli.svg)](https://pypi.python.org/pypi/ikeys-cli)
 
+## Installation
+### PYPI
+```shell
+pip install ikeys-cli
+```
+
+### GIT
+```shell
+pip install https://github.com/MrLYC/ikeys-cli/archive/master.zip
+```
+
 ## Quick start
 
 ```python
