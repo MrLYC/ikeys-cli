@@ -70,6 +70,12 @@ class TestIKeytoneAPI(unittest.TestCase):
         self.assertEqual(
             api.test.check._method, "POST",
         )
+        url, method = api._get_url_and_method(api.test.check)
+        self.assertEqual(url, "http://ikeystone.yy.com/%s" % api.test.check._url_path)
+        self.assertEqual(method, api.test.check._method)
+        url, method = api._get_url_and_method(api.nothing.to.get)
+        self.assertEqual(url, "http://ikeystone.yy.com/nothing/to")
+        self.assertEqual(method, "GET")
 
     def test_get_signature_info(self):
         expires = "159aa7c5377"

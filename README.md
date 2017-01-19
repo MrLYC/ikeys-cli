@@ -4,6 +4,8 @@
 [![codecov](https://codecov.io/gh/MrLYC/ikeys-cli/branch/master/graph/badge.svg)](https://codecov.io/gh/MrLYC/ikeys-cli)
 [![PyPI](https://img.shields.io/pypi/pyversions/ikeys-cli.svg)](https://pypi.python.org/pypi/ikeys-cli)
 
+ikeystone python client
+
 ## Installation
 ### PYPI
 ```shell
@@ -19,7 +21,7 @@ pip install https://github.com/MrLYC/ikeys-cli/archive/master.zip
 
 ```python
 from ikeys_cli import IKeytoneAPI
-api = IKeytoneAPI(url=settings.IKEYTONE_URL)
+api = IKeytoneAPI(url="https://ikeystone.example.com/v1/")
 api.authenticate(
     domain="server_domain",
     user="server_user",
