@@ -2,15 +2,20 @@
 
 from setuptools import setup
 
+with open("README", "rt") as fp:
+    long_description = fp.read()
+
 setup(
     name="ikeys-cli",
     packages=["ikeys_cli"],
-    version="0.3.3",
+    version="0.3.4",
     description="ikeystone python client",
     url="https://github.com/MrLYC/ikeys-cli",
+    long_description=long_description,
     author="MrLYC",
     author_email="imyikong@gmail.com",
     license="MIT",
+    include_package_data=True,
     classifiers=[
         "Development Status :: 3 - Alpha",
 
