@@ -62,6 +62,21 @@ class TestIKeytoneAPI(unittest.TestCase):
         self.request_patch.stop()
         self.path_meta = self.path_meta_patch.stop()
 
+    def test_url(self):
+        url = "http://ikeystone.yy.com/v1/"
+        api = ikeys_cli.IKeytoneAPI(url)
+        api_url, method = api._get_url_and_method(api.domain.request.verify)
+        self.assertEqual(
+            api_url, "http://ikeystone.yy.com/v1/domain/verifyRequest",
+        )
+        self.assertEqual(
+            method, "POST",
+        )
+
+        url = "http://ikeystone.yy.com/v1"
+        api = ikeys_cli.IKeytoneAPI(url)
+        api_url, method = api._get_url_and_method(api.domain.request.verify)
+
     def test_construction(self):
         api = ikeys_cli.IKeytoneAPI("http://ikeystone.yy.com")
         self.assertEqual(

@@ -16,7 +16,7 @@ elif os.path.exists("README.md"):
 setup(
     name="ikeys-cli",
     packages=["ikeys_cli"],
-    version="0.3.6",
+    version="0.3.7",
     description="ikeystone python client",
     url="https://github.com/MrLYC/ikeys-cli",
     long_description=long_description,

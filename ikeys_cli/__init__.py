@@ -185,6 +185,8 @@ class IKeytoneAPI(SimpleHTTPAPI):
     }
 
     def __init__(self, url, headers=None):
+        if not url.endswith("/"):
+            url = "%s/" % url
         super(IKeytoneAPI, self).__init__(url, headers)
         self._init_api_path(self, self.PATH_META)
         self._domain = None
@@ -205,7 +207,10 @@ class IKeytoneAPI(SimpleHTTPAPI):
 
     def _get_url_and_method(self, api_path):
         if hasattr(api_path, "_url_path") and hasattr(api_path, "_method"):
-            return urljoin(self._url, api_path._url_path), api_path._method
+            return (
+                urljoin(self._url, api_path._url_path),
+                api_path._method,
+            )
         return super(IKeytoneAPI, self)._get_url_and_method(api_path)
 
     def _get_request(
